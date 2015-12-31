@@ -37,7 +37,7 @@ Back in the settings, under `Docker Registry`:
 . Select `Docker Hub`.
 . Enter your credentials.
 . Check `Push image to docker registry`.
-. Click save and Build again.
+. Click `Save` and build the project again.
 
 Now your image is in the cloud and you're a star! Let's extend our testing. First we'll set up a more complex scenario using
 
@@ -53,7 +53,7 @@ Browse to the `Compositions` section and
 ----
 db: # Create a `Postgres` database in a container named `db`
   image: postgres
-  
+
 web: # Create a container for the Django web application named `web`
 
   image: '$DOCKER_HUB_USERNAME/djanga:master' # Base the container on the image we pushed in the previous stage
@@ -84,5 +84,6 @@ docker run -it --link integration_web_1:web phusion/baseimage bash -c "curl --si
 
 exit=$?
 ----
+
 
 And there you have it!
