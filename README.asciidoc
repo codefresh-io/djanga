@@ -12,8 +12,9 @@ This project uses Python Django to start a simple web application on port 8000.
 . Fork this repository to your own github user.
 . Login to your local Codefresh instance with your github account.
 . Add a new project and select the forked Djanga repository with the default master branch.
-. Select to use Djanga's own Dockerfile then click the `SKIP & CREATE" button.
+. Select to use Djanga's own Dockerfile then click the `SKIP & CREATE` button.
 . Once the build is created click `CLOSE & BUILD` to start a new build of the project.
+
 
 Now that the build has initialized, let's return to the build settings for some
 
@@ -23,9 +24,10 @@ Now that the build has initialized, let's return to the build settings for some
 
  python -m unittest composeexample.utils
 
-. Click save and Build (not Launch!) again.
+. Click `Save` and build (not Launch!) the project again.
 . One very simple test should fail. Fix this test and commit it, and a new build should automatically start
 (github webhooks, baby!).
+
 
 So the unit tests are running and the build has completed. It's time to
 
@@ -45,28 +47,31 @@ Browse to the `Compositions` section and
 
 . Add a new composition.
 . Enter a name such as `djanga-comp`.
-. Paste the following composition into the code editor and save:
+. Paste the following composition into the code editor and save (don't forget to replace `$DOCKER_HUB_USERNAME`):
 
 [source,yaml]
 ----
-db: # <1>
+db: # Create a `Postgres` database in a container named `db`
   image: postgres
-web: # <2>
-  image: '$DOCKER_HUB_USERNAME/djanga:master' # <3>
+  
+web: # Create a container for the Django web application named `web`
+
+  image: '$DOCKER_HUB_USERNAME/djanga:master' # Base the container on the image we pushed in the previous stage
+
+  # Use `netcat` to wait for the db before starting the webapp
   command: "bash -c \"echo \\\"Waiting for DB\\\"; while ! nc -z db 5432; do sleep 0.1; done; python manage.py runserver 0.0.0.0:8000\"" # <4>
+
   ports:
     - '8000:8000'
+
   links:
     - db
 ----
-<1> Create a `Postgres` database in a container named `db`.
-<2> Create a container for the Django web application named `web`.
-<3> Base the container on the image we pushed in the previous stage.
-<4> Use `netcat` to wait for the db before starting the webapp.
+
 
 Now that we've got a composition all set up, let's return to the build settings and add an
 
-== Integration Test
+== Integration test
 Under the `Integration Test Script` section paste the following script, then save and Build again:
 
 [source,bash]
