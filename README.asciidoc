@@ -1,0 +1,83 @@
+= Djanga
+
+A Codefresh onboarding tutorial.
+
+Use this humble repository to familiarize yourself with basic Codefresh functionality once you've got the development
+environment set up.
+
+This project uses Python Django to start a simple web application on port 8000.
+
+== Setting up the basic build
+
+. Fork this repository to your own github user.
+. Login to your local Codefresh instance with your github account.
+. Add a new project and select the forked Djanga repository with the default master branch.
+. Select to use Djanga's own Dockerfile then click the `SKIP & CREATE" button.
+. Once the build is created click `CLOSE & BUILD` to start a new build of the project.
+
+Now that the build has initialized, let's return to the build settings for some
+
+== Unit testing
+
+. In the `Unit Test Script` section enter:
+
+ python -m unittest composeexample.utils
+
+. Click save and Build (not Launch!) again.
+. One very simple test should fail. Fix this test and commit it, and a new build should automatically start
+(github webhooks, baby!).
+
+So the unit tests are running and the build has completed. It's time to
+
+== Push to Docker Hub
+Back in the settings, under `Docker Registry`:
+
+. Select `Docker Hub`.
+. Enter your credentials.
+. Check `Push image to docker registry`.
+. Click save and Build again.
+
+Now your image is in the cloud and you're a star! Let's extend our testing. First we'll set up a more complex scenario using
+
+== Compositions
+
+Browse to the `Compositions` section and
+
+. Add a new composition.
+. Enter a name such as `djanga-comp`.
+. Paste the following composition into the code editor and save:
+
+[source,yaml]
+----
+db: # <1>
+  image: postgres
+web: # <2>
+  image: '$DOCKER_HUB_USERNAME/djanga:master' # <3>
+  command: "bash -c \"echo \\\"Waiting for DB\\\"; while ! nc -z db 5432; do sleep 0.1; done; python manage.py runserver 0.0.0.0:8000\"" # <4>
+  ports:
+    - '8000:8000'
+  links:
+    - db
+----
+<1> Create a `Postgres` database in a container named `db`.
+<2> Create a container for the Django web application named `web`.
+<3> Base the container on the image we pushed in the previous stage.
+<4> Use `netcat` to wait for the db before starting the webapp.
+
+Now that we've got a composition all set up, let's return to the build settings and add an
+
+== Integration Test
+Under the `Integration Test Script` section paste the following script, then save and Build again:
+
+[source,bash]
+----
+echo "Starting test"
+
+# Create a new container, link it to the web container (created in the composition) and test the webapp with a curl request.
+# In the context of an integration test, all containers create in the composition are prefixed with `integration_` and suffixed by the container's index
+docker run -it --link integration_web_1:web phusion/baseimage bash -c "curl --silent \"http://web:8000\" > /dev/null"
+
+exit=$?
+----
+
+And there you have it!
