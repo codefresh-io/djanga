@@ -59,7 +59,7 @@ web: # Create a container for the Django web application named `web`
   image: '$DOCKER_HUB_USERNAME/djanga:master' # Base the container on the image we pushed in the previous stage
 
   # Use `netcat` to wait for the db before starting the webapp
-  command: "bash -c \"echo \\\"Waiting for DB\\\"; while ! nc -z db 5432; do sleep 0.1; done; python manage.py runserver 0.0.0.0:8000\"" # <4>
+  command: bash -c "echo \"Waiting for DB\"; while ! nc -z db 5432; do sleep 0.1; done; python manage.py runserver 0.0.0.0:8000"
 
   ports:
     - '8000:8000'
